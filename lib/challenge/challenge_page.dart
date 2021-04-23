@@ -2,13 +2,16 @@ import 'package:dev_quiz/challenge/challenge_controller.dart';
 import 'package:dev_quiz/challenge/widgets/next_button/next_button_widget.dart';
 import 'package:dev_quiz/challenge/widgets/question_indicator/question_indicator_widget.dart';
 import 'package:dev_quiz/challenge/widgets/quiz/quiz_widget.dart';
+import 'package:dev_quiz/result/result_page.dart';
 import 'package:dev_quiz/shared/models/question_model.dart';
 import 'package:flutter/material.dart';
 
 class ChallengePage extends StatefulWidget {
   final List<QuestionModel> questions;
+  final String title;
 
-  const ChallengePage({Key? key, required this.questions}) : super(key: key);
+  const ChallengePage({Key? key, required this.questions, required this.title})
+      : super(key: key);
   @override
   _ChallengePageState createState() => _ChallengePageState();
 }
@@ -29,6 +32,13 @@ class _ChallengePageState extends State<ChallengePage> {
     if (controller.currentPage < widget.questions.length)
       pageController.nextPage(
           duration: Duration(milliseconds: 200), curve: Curves.linear);
+  }
+
+  void onSelected(bool value) {
+    if (value) {
+      controller.hits++;
+    }
+    nextPage();
   }
 
   @override
@@ -63,7 +73,7 @@ class _ChallengePageState extends State<ChallengePage> {
         children: widget.questions
             .map((e) => QuizWidget(
                   question: e,
-                  onChange: nextPage,
+                  onSelected: onSelected,
                 ))
             .toList(),
       ),
@@ -87,7 +97,16 @@ class _ChallengePageState extends State<ChallengePage> {
                         child: NextButtonWidget.green(
                       label: 'Confirmar',
                       onTap: () {
-                        Navigator.pop(context);
+                        Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ResultPage(
+                              title: widget.title,
+                              length: widget.questions.length,
+                              result: controller.hits,
+                            ),
+                          ),
+                        );
                       },
                     )),
                 ],
